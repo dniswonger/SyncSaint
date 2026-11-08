@@ -1,0 +1,19 @@
+{
+  "name": "@syncsaint/sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "keygen": "tsx src/commands/keygen.ts",
+    "add-link": "tsx src/commands/addLink.ts",
+    "sync": "tsx src/commands/sync.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15"
+  },
+  "dependencies": {
+    "@syncsaint/core": "^0.1.0"
+  }
+}

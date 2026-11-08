@@ -1,0 +1,47 @@
+name: Add link
+
+# Redeem a link code from the SyncSaint web app: either your TIDAL account (do this first),
+# or a Spotify playlist owner's shared playlists. Codes are encrypted to this repo's key,
+# so it's fine that the input is visible in the run's details.
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: Link code (starts with ss1.)
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: syncsaint-state
+  cancel-in-progress: false
+
+jobs:
+  add-link:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      STATE_REPO: ${{ vars.STATE_REPO || github.repository }}
+      STATE_TOKEN: ${{ secrets.STATE_REPO_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: bash scripts/state.sh pull
+      - name: Redeem link code
+        run: npm run add-link
+        env:
+          LINK_CODE: ${{ inputs.code }}
+          SYNCSAINT_PRIVATE_KEY: ${{ secrets.SYNCSAINT_PRIVATE_KEY }}
+          SYNCSAINT_STATE_KEY: ${{ secrets.SYNCSAINT_STATE_KEY }}
+          SPOTIFY_CLIENT_ID: ${{ vars.SPOTIFY_CLIENT_ID }}
+          TIDAL_CLIENT_ID: ${{ vars.TIDAL_CLIENT_ID }}
+      - if: always()
+        run: bash scripts/state.sh push

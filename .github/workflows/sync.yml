@@ -1,0 +1,49 @@
+name: Sync
+
+on:
+  schedule:
+    - cron: '23 * * * *' # hourly, off the top of the hour to dodge scheduler congestion
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Re-sync every playlist even if Spotify reports no changes
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # push the encrypted state branch
+
+# Shared with add-link.yml: two runs must never read/write state at the same time,
+# or a rotated refresh token could be lost.
+concurrency:
+  group: syncsaint-state
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      STATE_REPO: ${{ vars.STATE_REPO || github.repository }}
+      STATE_TOKEN: ${{ secrets.STATE_REPO_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: bash scripts/state.sh pull
+      - name: Sync playlists
+        run: npm run sync
+        env:
+          SYNCSAINT_PRIVATE_KEY: ${{ secrets.SYNCSAINT_PRIVATE_KEY }}
+          SYNCSAINT_STATE_KEY: ${{ secrets.SYNCSAINT_STATE_KEY }}
+          SPOTIFY_CLIENT_ID: ${{ vars.SPOTIFY_CLIENT_ID }}
+          TIDAL_CLIENT_ID: ${{ vars.TIDAL_CLIENT_ID }}
+          SYNC_FORCE: ${{ inputs.force || 'false' }}
+      # Always save: even a partly failed run may have rotated refresh tokens.
+      - if: always()
+        run: bash scripts/state.sh push

@@ -1,0 +1,40 @@
+{
+  "name": "syncsaint",
+  "private": true,
+  "description": "Keep TIDAL playlists in sync with other people's Spotify playlists, run on GitHub Actions.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @syncsaint/web",
+    "build": "npm run build -w @syncsaint/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "keygen": "npm run keygen -w @syncsaint/sync",
+    "sync": "npm run sync -w @syncsaint/sync",
+    "add-link": "npm run add-link -w @syncsaint/sync"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.1.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents": false
+  }
+}

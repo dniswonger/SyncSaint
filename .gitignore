@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+
+# Local env files (client IDs are public, but keys never are)
+.env
+.env.*
+!.env.example
+
+# Decrypted / local sync state — never commit
+.state/
+state.json
+*.private.jwk
+keys.local.json
