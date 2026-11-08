@@ -2,7 +2,7 @@
  * Generate SyncSaint's keys.
  *
  *   npm run keygen -- --repo <owner>/<repo>   # writes secrets/variables straight into GitHub via `gh`
- *   npm run keygen                            # prints them instead (handle with care)
+ *   npm run keygen -- --print                 # prints them instead (handle with care)
  *
  * - SYNCSAINT_PRIVATE_KEY (secret):   opens link codes sealed by the web app
  * - SYNCSAINT_STATE_KEY (secret):     encrypts the state file
@@ -14,6 +14,16 @@ import { log } from '../log';
 
 const repoFlag = process.argv.indexOf('--repo');
 const repo = repoFlag >= 0 ? process.argv[repoFlag + 1] : undefined;
+const print = process.argv.includes('--print');
+
+if (!repo && !print) {
+  log.error('Pass --repo <owner>/<repo> to store keys in GitHub, or --print to show them.');
+  process.exit(2);
+}
+if (repo !== undefined && !/^[\w.-]+\/[\w.-]+$/.test(repo)) {
+  log.error(`--repo must look like owner/name (got "${repo}")`);
+  process.exit(2);
+}
 
 const keys = await generateRecipientKeys();
 const privateKey = JSON.stringify(keys.privateJwk);

@@ -15,9 +15,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "keygen": "npm run keygen -w @syncsaint/sync",
-    "sync": "npm run sync -w @syncsaint/sync",
-    "add-link": "npm run add-link -w @syncsaint/sync"
+    "keygen": "npm run keygen -w @syncsaint/sync --",
+    "sync": "npm run sync -w @syncsaint/sync --",
+    "add-link": "npm run add-link -w @syncsaint/sync --"
   },
   "engines": {
     "node": ">=24"
